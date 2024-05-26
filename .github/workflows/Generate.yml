@@ -97,7 +97,7 @@ jobs:
                 // 文件夹
                 const dirs = fs.readdirSync(filePath)
                 for (let dir of dirs) {
-                  await upload(path.join(dir, filePath))
+                  await upload(path.join(filePath, dir))
                 }
               } else if (stat.isFile()) {
                 // 文件 - 上传
