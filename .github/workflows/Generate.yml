@@ -91,13 +91,16 @@ jobs:
             const release_id = '${{ needs.create_release.outputs.id }}';
 
             const upload = async (filePath) => {
-              const stat = fs.statSync(filePath)
+              const stat = fs.statSync(filePath);
 
               if(stat.isDirectory()){
+                const nextFilePath = path.join(filePath, dir);
+                console.log('nextFilePath', nextFilePath);
+
                 // 文件夹
-                const dirs = fs.readdirSync(filePath)
+                const dirs = fs.readdirSync(nextFilePath);
                 for (let dir of dirs) {
-                  await upload(path.join(filePath, dir))
+                  await upload(nextFilePath);
                 }
               } else if (stat.isFile()) {
                 // 文件 - 上传
