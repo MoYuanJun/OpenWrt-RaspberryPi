@@ -66,8 +66,8 @@ jobs:
         run: |
           cd lede
           make download -j8 || make download -j1 V=s
-          rm -rf $(find ./dl/ -size -1024c)
-          ls -a ./bin/targets/bcm27xx/bcm2711
+          cd bin/targets/bcm27xx/bcm2711 && ls -n
+          pwd
       
       # step 4. 创建 GitHub Release
       - name: Create release                # 步骤名
