@@ -20,8 +20,8 @@ jobs:
       - run: |
           cat ./script/shell.sh
       - run: |       # 执行命令, 可换行执行多条命令
-          apt-get update
-          apt-get install sudo adduser -y
+          sudo apt-get update
+          sudo apt-get install sudo adduser -y
           echo 2222
           echo 3333
           echo 4444
