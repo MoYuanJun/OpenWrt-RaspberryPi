@@ -6,9 +6,9 @@
   "scripts": {
     "//": "npm run release -- --release-as 1.1.0",
     "release": "standard-version",
-    "version:100": "npm run release -- --release-as major",
-    "version:010": "npm run release -- --release-as minor",
-    "version:001": "npm run release -- --release-as patch"
+    "release:100": "npm run release -- --release-as major",
+    "release:010": "npm run release -- --release-as minor",
+    "release:001": "npm run release -- --release-as patch"
   },
   "keywords": [],
   "author": "",
