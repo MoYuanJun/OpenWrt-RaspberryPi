@@ -1,0 +1,12 @@
+{
+  "name": "lede-raspberry-pi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "tag": "git tag v%npm_config_tag% && git push origin v%npm_config_tag%"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
