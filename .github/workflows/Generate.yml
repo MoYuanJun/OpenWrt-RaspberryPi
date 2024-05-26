@@ -90,14 +90,14 @@ jobs:
             const path = require('path');
             const release_id = '${{ needs.create_release.outputs.id }}';
 
-            const upload = async (dir) => {
-              const stat = fs.statSync(dir)
+            const upload = async (filePath) => {
+              const stat = fs.statSync(filePath)
 
               if(stat.isDirectory()){
                 // 文件夹
-                const dirs = fs.readdirSync(dir)
+                const dirs = fs.readdirSync(filePath)
                 for (let dir of dirs) {
-                  await upload(path.join(dir,value))
+                  await upload(path.join(dir, filePath))
                 }
               } else if (stat.isFile()) {
                 // 文件 - 上传
