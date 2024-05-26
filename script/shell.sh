@@ -11,7 +11,7 @@ su $username
 Error: Validation Failed: {
   "resource":"Release",
   "code":"custom",
-  "field":"pre_receive",
+  "field":"pre_receive",11
   "message":"pre_receive Sorry, branch or tag names starting with 'refs/' are not allowed."
   
   }, {"resource":"Release","code":"custom","message":"Published releases must have a valid tag"}
