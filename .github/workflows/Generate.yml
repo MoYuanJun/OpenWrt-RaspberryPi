@@ -90,13 +90,28 @@ jobs:
             const fs = require('fs');
             const path = require('path');
             const release_id = '${{ needs.create_release.outputs.id }}';
-            for (let file of await fs.readdirSync('./bin/targets')) {
-              console.log('uploadReleaseAsset', file);
-              await github.repos.uploadReleaseAsset({
-                name: file,
-                repo: context.repo.repo,
-                release_id: release_id,
-                owner: context.repo.owner,
-                data: await fs.readFileSync(`./${file}`)
-              });
+
+            const upload = async (dir) => {
+              const stat = fs.statSync(dir)
+
+              if(stat.isDirectory()){
+                // 文件夹
+                const dirs = fs.readdirSync(dir)
+                for (let dir of dirs) {
+                  await upload(path.join(dir,value))
+                }
+              } else if (stat.isFile()) {
+                // 文件 - 上传
+                console.log('uploadReleaseAsset', file);
+                await github.repos.uploadReleaseAsset({
+                  name: file,
+                  repo: context.repo.repo,
+                  release_id: release_id,
+                  owner: context.repo.owner,
+                  data: await fs.readFileSync(`./${file}`)
+                });
+              }
             }
+
+            upload('./lede/bin/targets')
+            
