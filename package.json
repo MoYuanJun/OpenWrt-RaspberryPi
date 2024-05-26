@@ -3,7 +3,13 @@
   "version": "1.0.5",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "//": "npm run release -- --release-as 1.1.0",
+    "release": "standard-version",
+    "version:100": "npm run release -- --release-as major",
+    "version:010": "npm run release -- --release-as minor",
+    "version:001": "npm run release -- --release-as patch"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
