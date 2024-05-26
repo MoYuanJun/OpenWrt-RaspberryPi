@@ -94,28 +94,26 @@ jobs:
             const path = require('path');
             const release_id = '${{ needs.create_release.outputs.id }}';
 
-            const upload = async (filePath) => {
-              console.log('%c [ filePath ]-94', 'font-size:13px; background:pink; color:#bf2c9f;', filePath);
-              const stat = fs.statSync(filePath)
-
-              if(stat.isDirectory()){
-                // 文件夹
-                const dirs = fs.readdirSync(filePath)
-                console.log('%c [ dirs ]-99', 'font-size:13px; background:pink; color:#bf2c9f;', dirs);
-                for (let dir of dirs) {
-                  await upload(path.join(filePath, dir))
-                }
-              } else if (stat.isFile()) {
-                // 文件 - 上传
-                console.log('uploadReleaseAsset', file);
-                await github.repos.uploadReleaseAsset({
-                  name: file,
-                  repo: context.repo.repo,
-                  release_id: release_id,
-                  owner: context.repo.owner,
-                  data: await fs.readFileSync(`./${file}`)
-                });
-              }
+            const readFileList = (dir) => {
+              const isDirectory = fs.statSync(dir)?.isDirectory();
+              return isDirectory
+                ? fs.readdirSync(dir).reduce((total, file) => ([
+                  ...total,
+                  ...readFileList(path.join(dir?.pathname ?? dir, file)),
+                ]), [])
+                : [dir];
             }
 
-            upload('./lede/bin/targets')
+            const files = readFileList('./lede/bin/targets')
+            console.log('%c [ files ]-108', 'font-size:13px; background:pink; color:#bf2c9f;', files);
+
+            for (let file of files) {
+              console.log('uploadReleaseAsset', file);
+              await github.repos.uploadReleaseAsset({
+                name: path.basename(file),
+                release_id: release_id,
+                repo: context.repo.repo,
+                owner: context.repo.owner,
+                data: fs.readFileSync(file)
+              });
+            }
