@@ -35,7 +35,12 @@ jobs:
           libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 \
           python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
           uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-          echo 2222
+          sudo git clone https://github.com/coolsnowwolf/lede
+          sudo cd lede
+          sudo ./scripts/feeds update -a
+          sudo ./scripts/feeds install -a
+          sudo make download -j8
+          sudo make V=s -j8
           echo 3333
           echo 4444
           echo 5555
