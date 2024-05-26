@@ -67,7 +67,7 @@ jobs:
           cd lede
           make download -j8 || make download -j1 V=s
           rm -rf $(find ./dl/ -size -1024c)
-          ls -a ./bin/targets
+          ls -a ./bin/targets/bcm27xx/bcm2711
       
       # step 4. 创建 GitHub Release
       - name: Create release                # 步骤名
@@ -80,6 +80,10 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
+      - name: Test
+        run: |
+          cd ./lede/bin/targets/bcm27xx/bcm2711
+          ls -a
  
       - name: Upload release
         uses: actions/github-script@v3
