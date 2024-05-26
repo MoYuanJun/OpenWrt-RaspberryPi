@@ -36,7 +36,7 @@ jobs:
           python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
           uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
           sudo git clone https://github.com/coolsnowwolf/lede
-          sudo cd lede
+          cd lede
           sudo ./scripts/feeds update -a
           sudo ./scripts/feeds install -a
           sudo make download -j8
