@@ -38,6 +38,6 @@ jobs:
           cd lede
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-      - run: |       # 执行命令, 可换行执行多条命令
           sudo make download -j8
           sudo make V=s -j8
+          
