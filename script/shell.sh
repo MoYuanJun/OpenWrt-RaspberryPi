@@ -1,6 +1,6 @@
 #!/bin/bash
-username=$1
-password=$1
+username=moyuanjun
+password=moyuanjun
 
 apt-get install sudo adduser -y
 adduser $username --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password

@@ -18,7 +18,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - run: |
-          cat ./script/shell.sh
+          sudo chmod -R 777 ./script
+          sudo ./script/shell.sh
+      - run: |
+          ls -a ./script
       - run: |       # 执行命令, 可换行执行多条命令
           sudo apt-get update
           sudo apt-get install sudo adduser -y
