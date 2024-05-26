@@ -21,7 +21,7 @@ jobs:
           sudo chmod -R 777 ./script
           sudo ./script/shell.sh
       - run: |
-          w
+          whoami
           ls -a ./script
       - run: |       # 执行命令, 可换行执行多条命令
           sudo apt-get update
