@@ -16,11 +16,13 @@ jobs:
     runs-on: ubuntu-latest  
     steps:
       - run: |
-          echo 1111
+          git pull
+          ls -a
+      - run: |       # 执行命令, 可换行执行多条命令
+          apt-get update
+          apt-get install sudo adduser -y
           echo 2222
           echo 3333
           echo 4444
           echo 5555
           echo 6666
-
-      
