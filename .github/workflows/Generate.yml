@@ -1,5 +1,5 @@
 # 工作流名称
-name: Generate
+name: openWrt-lede-raspberryPi
 
 # 工作流触发时机, see: https://docs.github.com/zh/actions/using-workflows/triggering-a-workflow
 # 触发条件修改为: 当 main 分支有 push 操作 || 每天 0 点
@@ -9,18 +9,17 @@ on:
   push:
     branches: 
       - main
+
 # 作业, see: https://docs.github.com/zh/actions/using-jobs/using-jobs-in-a-workflow
 jobs:
-  # 生成 Snake 图(贪吃蛇), 用 Platane/snk 生成图片, see: https://github.com/Platane/snk
-  openWrt-RaspberryPi: 
+  OpenWrt-RaspberryPi: 
     runs-on: ubuntu-latest  
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        
       - name: Space cleanup
         run: |
-          docker rmi `docker images -q`
-          sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d /usr/local/lib/android
           sudo apt update -y
           sudo apt full-upgrade -y
           sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
@@ -30,45 +29,74 @@ jobs:
             libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 \
             python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
             uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-          sudo -E apt-get clean
-          df -h
-      - name: clone lede
+          sudo apt-get clean
+        
+      - name: Clone lede
         run: |
           git clone https://github.com/coolsnowwolf/lede.git
+
       - name: Update feeds
         run: |
           cd lede
-          pwd
           ./scripts/feeds update -a
           ./scripts/feeds install -a
-      - name: Generate configuration file
+        
+      - name: Generate config file
         run: |
           cd lede
-          pwd
           rm -f ./.config*
-          touch ./.config
+          mkdir ./.config
 
-          #
-          # 在 cat >> .config <<EOF 到 EOF 之间粘贴你的编译配置, 需注意缩进关系
-          # 例如:
+          # 在 cat >> .config <<EOF 到 EOF 之间粘贴你的编译配置, 需注意缩进关系, 例如:
 
           cat >> .config <<EOF
-          CONFIG_TARGET_IMAGES_GZIP=y
-          CONFIG_KERNEL_BUILD_USER="OpenWrt-CI"
-          CONFIG_KERNEL_BUILD_DOMAIN="Azure"
+
+          # RaspberryPi 4B 配置
+          CONFIG_TARGET_bcm27xx=y
+          CONFIG_TARGET_bcm27xx_bcm2711=y
+          CONFIG_TARGET_bcm27xx_bcm2711_DEVICE_rpi-4=y
+
           EOF
 
-          #
           # ===============================================================
-          # 
 
-          sed -i 's/^[ \t]*//g' ./.config
+          sed -i 's/^[ \t]*//g' ./.config # 删除文件中每行的所有前导空格
           make defconfig
+    
       - name: Make download
         run: |
           cd lede
-          pwd
           make download -j8 || make download -j1 V=s
           rm -rf $(find ./dl/ -size -1024c)
           ls -a ./bin/targets
-          df -h
+      
+      # step 4. 创建 GitHub Release
+      - name: Create release                # 步骤名
+        id: create_release                  # 步骤 ID, 后面的步骤可使用该 ID 获取当前步骤输出内容
+        uses: actions/create-release@master # 使用插件名 => https://github.com/actions/create-release
+        env: # 环境变量设置
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 该 token 由 Actions 提供, 不需要自己创建(照着写就行)
+        with: # 插件参数传递
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+ 
+      - name: Upload release
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const release_id = '${{ needs.create_release.outputs.id }}';
+            for (let file of await fs.readdirSync('./bin/targets')) {
+              console.log('uploadReleaseAsset', file);
+              await github.repos.uploadReleaseAsset({
+                name: file,
+                repo: context.repo.repo,
+                release_id: release_id,
+                owner: context.repo.owner,
+                data: await fs.readFileSync(`./${file}`)
+              });
+            }
