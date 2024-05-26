@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-latest  
     steps:
       - run: |
-          git pull
           ls -a
       - run: |       # 执行命令, 可换行执行多条命令
           apt-get update
