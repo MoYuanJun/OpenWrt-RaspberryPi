@@ -32,8 +32,14 @@ jobs:
             uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
           sudo -E apt-get clean
           df -h
+      - name: cd 
+        run: |
+          git clone git@github.com:coolsnowwolf/lede.git
+          cd lede
+          pwd
       - name: Update feeds
         run: |
+          pwd
           ./scripts/feeds update -a
           ./scripts/feeds install -a
       - run: |       # 执行命令, 可换行执行多条命令
