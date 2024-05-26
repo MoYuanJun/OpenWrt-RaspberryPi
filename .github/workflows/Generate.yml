@@ -18,6 +18,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         
+      # step 4. 创建 GitHub Release
+      - name: Create release                # 步骤名
+        id: create_release                  # 步骤 ID, 后面的步骤可使用该 ID 获取当前步骤输出内容
+        uses: actions/create-release@master # 使用插件名 => https://github.com/actions/create-release
+        env: # 环境变量设置
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 该 token 由 Actions 提供, 不需要自己创建(照着写就行)
+        with: # 插件参数传递
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          
       - name: Space cleanup
         run: |
           sudo apt update -y
