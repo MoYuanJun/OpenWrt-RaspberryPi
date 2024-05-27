@@ -1,23 +1,32 @@
+
+
+
 const fs = require('fs');
-            const path = require('path');
-            const release_id = '${{ needs.create_release.outputs.id }}';
+const path = require('path');
 
-            const upload = async (filePath) => {
-              console.log('%c [ filePath ]-94', 'font-size:13px; background:pink; color:#bf2c9f;', filePath);
-              const stat = fs.statSync(filePath)
+const { repo: { owner, repo }, sha } = context;
+console.log({ owner, repo, sha });
 
-              if(stat.isDirectory()){
-                // 文件夹
-                const dirs = fs.readdirSync(filePath)
-                console.log('%c [ dirs ]-99', 'font-size:13px; background:pink; color:#bf2c9f;', dirs);
-                for (let dir of dirs) {
-                  await upload(path.join(filePath, dir))
-                }
-              } else if (stat.isFile()) {
-                // 文件 - 上传
-                console.log('uploadReleaseAsset');
-               
-              }
-            }
+const release = await github.repos.createRelease({
+  owner, repo,
+  draft: true,
+  target_commitish: sha,
+  tag_name: process.env.GITHUB_REF,
+});
 
-            upload('./lede/bin/targets')
+  for (let file of await fs.readdirSync('./openWrt/bin/targets/bcm27xx/bcm2711')) {
+  console.log('%c [ file ]-108', 'font-size:13px; background:pink; color:#bf2c9f;', file);
+  const filePath = `./openWrt/bin/targets/bcm27xx/bcm2711/${file}`
+
+  if (/\.img\.gz$/.test(file)) {
+    console.log('%c [ file ]-122', 'font-size:13px; background:pink; color:#bf2c9f;', file);
+
+    await github.repos.uploadReleaseAsset({
+      repo,
+      owner, 
+      name: file,
+      release_id: release.data.id,
+      data: await fs.readFileSync(filePath)
+    }); 
+  }
+}
