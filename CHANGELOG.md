@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [](https://github.com/MoYuanJun/lede-raspberry-pi/compare/v1.0.19...v) (2024-05-27)
+## [1.1.0](https://github.com/MoYuanJun/lede-raspberry-pi/compare/v1.0.19...v1.1.0) (2024-05-27)
 
 ### [1.0.19](https://github.com/MoYuanJun/lede-raspberry-pi/compare/v1.0.18...v1.0.19) (2024-05-27)
 
