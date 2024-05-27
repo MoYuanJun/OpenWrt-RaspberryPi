@@ -8,41 +8,50 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  TZ: Asia/Shanghai
 
 # 作业, see: https://docs.github.com/zh/actions/using-jobs/using-jobs-in-a-workflow
 jobs:
   OpenWrt-RaspberryPi: 
     runs-on: ubuntu-latest  
     steps:
+      # step 1. 切到当前仓库
       - name: Checkout
         uses: actions/checkout@v3
         
+      # step 2. 更新相关依赖
       - name: Space cleanup
         run: |
-          sudo apt update -y
-          sudo apt full-upgrade -y
-          sudo apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+          sudo -E apt-get update -y
+          sudo -E apt-get full-upgrade -y
+          sudo -E apt-get install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
             bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib \
             git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev \
             libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libpython3-dev libreadline-dev \
             libssl-dev libtool lrzsz mkisofs msmtp ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 \
             python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion swig texinfo \
             uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-          sudo apt-get clean
-        
-      - name: Clone lede
+          sudo -E apt-get clean
+          sudo timedatectl set-timezone "$TZ"
+      
+      # step 3. 克隆仓库
+      - name: Clone openWrt
         run: |
-          git clone https://github.com/coolsnowwolf/lede.git
+          git clone $REPO_URL openWrt
 
+      # step 4. 更新 feeds
       - name: Update feeds
         run: |
-          cd lede
+          cd openWrt
           ./scripts/feeds update -a
           ./scripts/feeds install -a
         
+      # step 5. 生成配置文件
       - name: Generate config file
         run: |
-          cd lede
+          cd openWrt
           rm -f ./.config*
           touch ./.config
 
@@ -71,15 +80,15 @@ jobs:
           sed -i 's/^[ \t]*//g' ./.config # 删除文件中每行的所有前导空格
           make defconfig
     
+      # step 6. 编译
       - name: Make download
         run: |
-          cd lede
+          cd openWrt
           make download -j8
           make V=s -j8
           cd bin/targets/bcm27xx/bcm2711 && ls -n
-          pwd
       
-      # step 4. 创建 GitHub Release
+      # step 7. 创建 GitHub Release
       - name: Create release                # 步骤名
         id: create_release                  # 步骤 ID, 后面的步骤可使用该 ID 获取当前步骤输出内容
         uses: actions/create-release@master # 使用插件名 => https://github.com/actions/create-release
@@ -92,9 +101,10 @@ jobs:
           prerelease: false
       - name: Test
         run: |
-          cd ./lede/bin/targets/bcm27xx/bcm2711
+          cd ./openWrt/bin/targets/bcm27xx/bcm2711
           ls -a
  
+      #  step 8. 上传 Release 资源
       - name: Upload release
         uses: actions/github-script@v3
         with:
@@ -104,9 +114,9 @@ jobs:
             const path = require('path');
             const release_id = '${{ needs.create_release.outputs.id }}';
 
-             for (let file of await fs.readdirSync('./lede/bin/targets/bcm27xx/bcm2711')) {
+             for (let file of await fs.readdirSync('./openWrt/bin/targets/bcm27xx/bcm2711')) {
               console.log('%c [ file ]-108', 'font-size:13px; background:pink; color:#bf2c9f;', file);
-              const filePath = `./lede/bin/targets/bcm27xx/bcm2711/${file}`
+              const filePath = `./openWrt/bin/targets/bcm27xx/bcm2711/${file}`
               const isDirectory = fs.statSync(filePath)?.isDirectory();
 
               if (!isDirectory) {
@@ -119,4 +129,3 @@ jobs:
                 });
               }
             }
-
