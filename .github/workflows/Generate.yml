@@ -104,26 +104,19 @@ jobs:
             const path = require('path');
             const release_id = '${{ needs.create_release.outputs.id }}';
 
-            const readFileList = (dir) => {
-              const isDirectory = fs.statSync(dir)?.isDirectory();
-              return isDirectory
-                ? fs.readdirSync(dir).reduce((total, file) => ([
-                  ...total,
-                  ...readFileList(path.join(dir?.pathname ?? dir, file)),
-                ]), [])
-                : [dir];
+             for (let file of await fs.readdirSync('./lede/bin/targets/bcm27xx/bcm2711')) {
+              console.log('%c [ file ]-108', 'font-size:13px; background:pink; color:#bf2c9f;', file);
+              const filePath = `./lede/bin/targets/bcm27xx/bcm2711/${file}`
+              const isDirectory = fs.statSync(filePath)?.isDirectory();
+
+              if (!isDirectory) {
+                await github.repos.uploadReleaseAsset({
+                  name: file,
+                  release_id: release_id,
+                  repo: context.repo.repo,
+                  owner: context.repo.owner,
+                  data: await fs.readFileSync(filePath)
+                });
+              }
             }
 
-            const files = readFileList('./lede/bin/targets')
-            console.log('%c [ files ]-108', 'font-size:13px; background:pink; color:#bf2c9f;', files);
-
-            for (let file of files) {
-              console.log('uploadReleaseAsset', file);
-              await github.repos.uploadReleaseAsset({
-                name: path.basename(file),
-                release_id: release_id,
-                repo: context.repo.repo,
-                owner: context.repo.owner,
-                data: fs.readFileSync(file)
-              });
-            }
