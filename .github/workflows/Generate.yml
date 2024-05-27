@@ -107,7 +107,7 @@ jobs:
               tag_name: process.env.GITHUB_REF,
             });
 
-             for (let file of await fs.readdirSync('./openWrt/bin/targets/bcm27xx/bcm2711')) {
+            for (let file of await fs.readdirSync('./openWrt/bin/targets/bcm27xx/bcm2711')) {
               const filePath = `./openWrt/bin/targets/bcm27xx/bcm2711/${file}`
 
               if (/\.gz$/.test(file)) {
