@@ -88,23 +88,7 @@ jobs:
           make V=s -j8
           cd bin/targets/bcm27xx/bcm2711 && ls -n
       
-      # step 7. 创建 GitHub Release
-      - name: Create release                # 步骤名
-        id: create_release                  # 步骤 ID, 后面的步骤可使用该 ID 获取当前步骤输出内容
-        uses: actions/create-release@master # 使用插件名 => https://github.com/actions/create-release
-        env: # 环境变量设置
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # 该 token 由 Actions 提供, 不需要自己创建(照着写就行)
-        with: # 插件参数传递
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: false
-          prerelease: false
-      - name: Test
-        run: |
-          cd ./openWrt/bin/targets/bcm27xx/bcm2711
-          ls -a
- 
-      #  step 8. 上传 Release 资源
+      # step 7. 创建 GitHub Release & 上传 Release 资源
       - name: Upload release
         uses: actions/github-script@v3
         with:
@@ -112,7 +96,16 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            const release_id = '${{ needs.create_release.outputs.id }}';
+
+            const { repo: { owner, repo }, sha } = context;
+            console.log({ owner, repo, sha });
+
+            const release = await github.repos.createRelease({
+              owner, repo,
+              draft: true,
+              target_commitish: sha
+              tag_name: process.env.GITHUB_REF,
+            });
 
              for (let file of await fs.readdirSync('./openWrt/bin/targets/bcm27xx/bcm2711')) {
               console.log('%c [ file ]-108', 'font-size:13px; background:pink; color:#bf2c9f;', file);
@@ -122,11 +115,11 @@ jobs:
                 console.log('%c [ file ]-122', 'font-size:13px; background:pink; color:#bf2c9f;', file);
 
                 await github.repos.uploadReleaseAsset({
+                  repo,
+                  owner, 
                   name: file,
-                  release_id: release_id,
-                  repo: context.repo.repo,
-                  owner: context.repo.owner,
+                  release_id: release.data.id,
                   data: await fs.readFileSync(filePath)
-                });
+                }); 
               }
             }
