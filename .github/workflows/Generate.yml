@@ -1,5 +1,5 @@
 # 工作流名称
-name: openWrt-lede-raspberryPi
+name: OpenWrt RaspberryPi
 
 # 工作流触发时机, see: https://docs.github.com/zh/actions/using-workflows/triggering-a-workflow
 # 触发条件修改为: 当 main 分支有 push 操作 || 每天 0 点
@@ -117,9 +117,10 @@ jobs:
              for (let file of await fs.readdirSync('./openWrt/bin/targets/bcm27xx/bcm2711')) {
               console.log('%c [ file ]-108', 'font-size:13px; background:pink; color:#bf2c9f;', file);
               const filePath = `./openWrt/bin/targets/bcm27xx/bcm2711/${file}`
-              const isDirectory = fs.statSync(filePath)?.isDirectory();
 
-              if (!isDirectory) {
+              if (/\.img\.gz$/.test(file)) {
+                console.log('%c [ file ]-122', 'font-size:13px; background:pink; color:#bf2c9f;', file);
+
                 await github.repos.uploadReleaseAsset({
                   name: file,
                   release_id: release_id,
