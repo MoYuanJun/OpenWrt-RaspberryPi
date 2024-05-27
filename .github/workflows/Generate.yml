@@ -55,6 +55,15 @@ jobs:
           CONFIG_TARGET_bcm27xx_bcm2711=y
           CONFIG_TARGET_bcm27xx_bcm2711_DEVICE_rpi-4=y
 
+          # Set Firmware Size
+          CONFIG_TARGET_KERNEL_PARTSIZE=64
+          CONFIG_TARGET_ROOTFS_PARTSIZE=960
+
+          # Firmware Type
+          CONFIG_TARGET_ROOTFS_TARGZ=y
+          # CONFIG_TARGET_ROOTFS_EXT4FS is not set
+          CONFIG_TARGET_ROOTFS_SQUASHFS=y
+
           EOF
 
           # ===============================================================
@@ -65,7 +74,8 @@ jobs:
       - name: Make download
         run: |
           cd lede
-          make download -j8 || make download -j1 V=s
+          make download -j8
+          make V=s -j8
           cd bin/targets/bcm27xx/bcm2711 && ls -n
           pwd
       
